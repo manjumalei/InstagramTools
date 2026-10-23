@@ -135,8 +135,8 @@
     matches = [];
     scanIndex = 0;
     parseExport(await file.text());
-    el('[data-limit]').max = String(usernames.size);
-    el('[data-limit]').value = String(usernames.size || 1);
+    el('[data-limit]').max = String(Math.min(2000, usernames.size));
+    el('[data-limit]').value = String(Math.min(2000, usernames.size || 1));
     el('[data-scan]').disabled = usernames.size === 0;
     el('[data-reset]').disabled = usernames.size === 0;
     say(usernames.size ? `Loaded ${usernames.size} usernames. No requests changed.` : 'No usernames found. Choose pending_follow_requests.html.');
@@ -159,7 +159,7 @@
     el('[data-scan]').disabled = true;
     el('[data-stop]').disabled = false;
     const names = [...usernames];
-    const scanLimit = Math.max(1, Math.min(100, Number(el('[data-scan-limit]').value) || 25));
+    const scanLimit = Math.max(1, Math.min(200, Number(el('[data-scan-limit]').value) || 25));
     const scanEnd = Math.min(names.length, scanIndex + scanLimit);
     const delay = Math.max(3, Math.min(60, Number(el('[data-scan-delay]').value) || 5)) * 1000;
     el('[data-file]').disabled = true;
@@ -194,7 +194,7 @@
 
   el('[data-stop]').addEventListener('click', () => { stopped = true; });
   el('[data-run]').addEventListener('click', async () => {
-    const limit = Math.max(1, Math.min(matches.length, Number(el('[data-limit]').value) || matches.length));
+    const limit = Math.max(1, Math.min(2000, matches.length, Number(el('[data-limit]').value) || matches.length));
     const delay = Math.max(3, Math.min(60, Number(el('[data-delay]').value) || 10)) * 1000;
     const batch = matches.slice(0, limit);
     if (!batch.length || !confirm(`Withdraw ${batch.length} matched request(s), starting with @${batch[0].username}? Requests will be processed one at a time; the run stops if Instagram rate-limits it.`)) return;

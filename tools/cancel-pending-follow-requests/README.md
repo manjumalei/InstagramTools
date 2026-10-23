@@ -21,7 +21,7 @@ The current script expects the export's table header to be `Benutzername` (Germa
 2. Open the browser's Developer Tools Console. In Chrome or Edge on macOS, use **Option+Command+J**.
 3. Open `cancel_pending_follow_requests.js` in a text editor, review the code, copy its contents, and paste them into the console. Run the code. If the browser displays a paste warning, follow its instructions only after reviewing the code.
 4. The script adds a control panel to the Instagram page. Choose `pending_follow_requests.html` with its file picker.
-5. Click **Resolve IDs (read-only)**. This checks the exported usernames against profile and friendship status pages. This stage does not withdraw any requests. Lookups run in batches of up to 100 accounts, with a configurable pause between requests. Click the button again to continue another batch.
+5. Click **Resolve IDs (read-only)**. This checks the exported usernames against profile and friendship status pages. This stage does not withdraw any requests. Lookups run in batches of up to 200 accounts, with a configurable pause between requests. Click the button again to continue another batch.
 6. When the lookup is complete, review the number of accounts still showing an outgoing request. Set the cancellation batch size and delay, then click **Cancel selected requests** only if you want to proceed.
 7. Confirm the prompt. Requests are processed one at a time. Use **Stop** to stop before the next cancellation. The script stops if Instagram reports rate limiting or an action block.
 8. Close the panel when finished.
