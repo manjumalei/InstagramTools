@@ -26,6 +26,19 @@ The current script expects the export's table header to be `Benutzername` (Germa
 7. Confirm the prompt. Requests are processed one at a time. Use **Stop** to stop before the next cancellation. The script stops if Instagram reports rate limiting or an action block.
 8. Close the panel when finished.
 
+## Why limits and pauses matter
+
+| Setting | Purpose |
+| --- | --- |
+| **Usernames per scan run** | Bounds the number of exported profiles checked per click. Smaller lookup batches keep read-only network activity manageable and give you a chance to review progress before continuing. |
+| **Pause between ID lookups** | Spaces profile and friendship-status requests instead of sending them in a rapid burst. Read-only lookups still make requests to Instagram and can be rate-limited. |
+| **Requests per cancel run** | Caps the number of pending follow requests considered for withdrawal in one confirmed run. Small batches limit the scope of account changes and let you review results before authorizing more. The maximum is not a recommended batch size. |
+| **Delay in seconds** | Adds spacing between cancellation attempts. Each attempt also rechecks the current relationship, so the total time between withdrawals can be longer than this setting. |
+
+Batch sizes count profiles or cancellation attempts, not individual HTTP requests: one profile can require multiple requests. Pauses control pacing; batch limits control the amount of work per run. Increasing a batch size does not make Instagram permit more requests.
+
+These ranges are internal script limits, not Instagram-published allowances or guaranteed safe settings. Small batches and longer pauses may reduce request bursts, but cannot prevent rate limits, verification prompts, action blocks, or other account restrictions. Start small, review each batch, and stop if Instagram reports a restriction rather than repeatedly retrying or lowering the delays.
+
 ## Important notes
 
 - The export file is read locally by the script; it is not uploaded to another service. The script does make requests to Instagram using your signed-in browser session to look up account status and, if you confirm, withdraw requests.

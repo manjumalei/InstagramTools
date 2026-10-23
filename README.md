@@ -7,6 +7,8 @@ A collection of small, independent tools for managing and working with Instagram
 | Tool | Description | Guide |
 | --- | --- | --- |
 | [Cancel pending follow requests](tools/cancel-pending-follow-requests/) | Find and optionally withdraw outgoing follow requests using an Instagram data export and a browser console. | [Usage instructions](tools/cancel-pending-follow-requests/README.md) |
+| [Find non-followers](tools/find-non-followers/index.html) | Select exported followers and following in your browser and create a searchable HTML report with direct profile links. Also available as a Python script. | [Usage instructions](tools/find-non-followers/README.md) |
+| [Unfollow non-followers](tools/unfollow-non-followers/) | Compare HTML exports in the Instagram browser console, verify live relationships, and optionally unfollow explicitly selected profiles in confirmed batches. | [Usage instructions](tools/unfollow-non-followers/README.md) |
 
 ## Repository structure
 
@@ -17,6 +19,14 @@ tools/
 	cancel-pending-follow-requests/
 		README.md
 		cancel_pending_follow_requests.js
+	find-non-followers/
+		README.md
+		index.html
+		find_non_followers.py
+		test_find_non_followers.py
+	unfollow-non-followers/
+		README.md
+		unfollow_non_followers.js
 ```
 
 ## Disclaimer

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Instagram: Not Following Back</title>
+<style>
+:root { --ink: #202624; --muted: #56615b; --accent: #146547; --line: #d6dfd9; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f8faf9; color: var(--ink);
+  font: 16px/1.6 "Avenir Next", "Segoe UI", sans-serif; letter-spacing: 0; }
+main { max-width: 880px; margin: auto; padding: 40px 20px; }
+header { border-top: 5px solid var(--accent); padding-top: 20px; margin-bottom: 28px; }
+h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; overflow-wrap: anywhere; }
+h2 { font-size: 20px; margin: 0; }
+p { margin: 8px 0; color: var(--muted); }
+form { border-block: 1px solid var(--line); padding: 24px 0; }
+.files { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+input { width: 100%; min-width: 0; font: inherit; color: var(--ink); }
+input[type="file"] { font-size: 14px; }
+input::file-selector-button { font: inherit; background: white; color: var(--ink);
+  border: 1px solid #86998c; border-radius: 4px; padding: 8px; margin-right: 8px; cursor: pointer; }
+.hint { font-size: 13px; overflow-wrap: anywhere; }
+button { font: inherit; font-weight: 600; border: 1px solid var(--accent); border-radius: 4px;
+  background: var(--accent); color: white; padding: 10px 16px; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; }
+.secondary { background: white; color: var(--accent); }
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid #bb5b21; outline-offset: 3px; }
+#error { color: #a22727; overflow-wrap: anywhere; }
+#warning { color: #75451f; }
+#report { margin-top: 28px; }
+.report-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+  border-block: 1px solid var(--line); margin: 20px 0; padding: 18px 0; }
+.stats dt { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.stats dd { margin: 0; font-size: 26px; font-weight: 600; }
+input[type="search"] { padding: 10px 12px; border: 1px solid #86998c; border-radius: 4px; background: white; }
+ol { margin: 16px 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+li { border-bottom: 1px solid var(--line); }
+li a { display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 12px 4px; color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+li a:hover { background: #eaf1ec; text-decoration: underline; }
+li a:visited { color: #75451f; }
+.handle { min-width: 0; }
+.arrow { flex-shrink: 0; }
+footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+[hidden] { display: none !important; }
+@media (max-width: 580px) { .files { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) { main { padding: 24px 16px; } h1 { font-size: 24px; }
+  .stats { gap: 8px; } .stats dd { font-size: 22px; } }
+@media print { #setup, #download, .search { display: none; }
+  main { max-width: none; padding: 0; } li[hidden] { display: block !important; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>Instagram: Not Following Back</h1>
+<p>Profiles you follow that do not follow you back.</p>
+</header>
+<form id="setup">
+<div class="files">
+<div>
+<label for="followers">Followers files</label>
+<input id="followers" type="file" accept=".html,text/html" multiple required aria-describedby="followers-hint">
+<p id="followers-hint" class="hint">followers_1.html, followers_2.html, &hellip;</p>
+</div>
+<div>
+<label for="following">Following file</label>
+<input id="following" type="file" accept=".html,text/html" required aria-describedby="following-hint">
+<p id="following-hint" class="hint">following.html</p>
+</div>
+</div>
+<div class="actions"><button id="create" type="submit">Create report</button></div>
+<p id="error" role="alert" hidden></p>
+</form>
+<section id="report" aria-labelledby="report-title" hidden>
+<div class="report-heading">
+<h2 id="report-title" tabindex="-1">Your report</h2>
+<button id="download" type="button" class="secondary">Download HTML</button>
+</div>
+<dl class="stats">
+<div><dt>Followers</dt><dd id="followers-count">0</dd></div>
+<div><dt>Following</dt><dd id="following-count">0</dd></div>
+<div><dt>Not following back</dt><dd id="missing-count">0</dd></div>
+</dl>
+<p id="warning" role="status" hidden></p>
+<div class="search">
+<label for="search">Search profiles</label>
+<input id="search" type="search" autocomplete="off" spellcheck="false">
+<p id="visible-count" role="status" aria-live="polite"></p>
+</div>
+<ol id="profiles" aria-label="Profiles not following you back"></ol>
+<p id="empty" hidden>No profiles found.</p>
+<p id="generated" class="hint"></p>
+</section>
+<footer>Data source: your Instagram export. Changes made after the export are not included.</footer>
+</main>
+<script id="report-script">
+function filterProfiles() {
+  const query = document.getElementById('search').value.trim().toLowerCase().replace(/^@/, '');
+  const rows = Array.from(document.querySelectorAll('#profiles li'));
+  let visible = 0;
+  for (const row of rows) {
+    row.hidden = !row.dataset.username.includes(query);
+    if (!row.hidden) visible += 1;
+  }
+  document.getElementById('visible-count').textContent = visible + ' of ' + rows.length + ' profiles';
+  document.getElementById('empty').hidden = visible !== 0;
+}
+document.getElementById('search').addEventListener('input', filterProfiles);
+filterProfiles();
+</script>
+<script id="app-script">
+const setup = document.getElementById('setup');
+const followersInput = document.getElementById('followers');
+const followingInput = document.getElementById('following');
+const report = document.getElementById('report');
+const error = document.getElementById('error');
+const create = document.getElementById('create');
+
+function parseProfiles(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const usernames = new Set();
+  for (const anchor of template.content.querySelectorAll('a[href]')) {
+    try {
+      const url = new URL(anchor.getAttribute('href'));
+      if (!['http:', 'https:'].includes(url.protocol) ||
+          !['instagram.com', 'www.instagram.com'].includes(url.hostname)) continue;
+      let parts = decodeURIComponent(url.pathname).replace(/^\/+|\/+$/g, '').split('/');
+      if (parts.length === 2 && parts[0] === '_u') parts = parts.slice(1);
+      if (parts.length === 1 && /^[a-zA-Z0-9_.]{1,30}$/.test(parts[0])) {
+        usernames.add(parts[0].toLowerCase());
+      }
+    } catch {
+      continue;
+    }
+  }
+  return usernames;
+}
+
+setup.addEventListener('change', () => {
+  report.hidden = true;
+  error.hidden = true;
+});
+
+setup.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  report.hidden = true;
+  error.hidden = true;
+  const followerFiles = Array.from(followersInput.files);
+  const followingFile = followingInput.files[0];
+  create.disabled = true;
+  followersInput.disabled = true;
+  followingInput.disabled = true;
+  create.textContent = 'Creating report...';
+  try {
+    if (!followerFiles.length || !followingFile) throw new Error('Select both exports first.');
+    if (followerFiles.some(file => !/^followers_\d+\.html$/i.test(file.name))) {
+      throw new Error('Select followers_1.html and any additional followers_*.html parts.');
+    }
+    if (followingFile.name.toLowerCase() !== 'following.html') {
+      throw new Error('Select following.html as the following file.');
+    }
+    const followers = new Set();
+    for (const file of followerFiles) {
+      for (const username of parseProfiles(await file.text())) followers.add(username);
+    }
+    const following = parseProfiles(await followingFile.text());
+    const missing = Array.from(following).filter(username => !followers.has(username)).sort();
+    const fragment = document.createDocumentFragment();
+    for (const username of missing) {
+      const row = document.createElement('li');
+      row.dataset.username = username;
+      const link = document.createElement('a');
+      link.href = 'https://www.instagram.com/' + username + '/';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      const handle = document.createElement('span');
+      handle.className = 'handle';
+      handle.textContent = '@' + username;
+      const arrow = document.createElement('span');
+      arrow.className = 'arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = String.fromCodePoint(0x2197);
+      link.append(handle, arrow);
+      row.append(link);
+      fragment.append(row);
+    }
+    document.getElementById('profiles').replaceChildren(fragment);
+    document.getElementById('followers-count').textContent = followers.size;
+    document.getElementById('following-count').textContent = following.size;
+    document.getElementById('missing-count').textContent = missing.length;
+    const warning = document.getElementById('warning');
+    warning.hidden = followers.size !== 0 && following.size !== 0;
+    warning.textContent = warning.hidden ? '' :
+      'One export contains no recognized profile links. Verify your files and counts before using these results.';
+    document.getElementById('generated').textContent = 'Generated on ' + new Date().toISOString();
+    document.getElementById('search').value = '';
+    filterProfiles();
+    report.hidden = false;
+    document.getElementById('report-title').focus();
+  } catch (failure) {
+    error.textContent = failure instanceof Error ? failure.message : 'Could not read the selected files.';
+    error.hidden = false;
+  } finally {
+    create.disabled = false;
+    followersInput.disabled = false;
+    followingInput.disabled = false;
+    create.textContent = 'Create report';
+  }
+});
+
+document.getElementById('download').addEventListener('click', () => {
+  const snapshot = document.documentElement.cloneNode(true);
+  for (const selector of ['#setup', '#download', '#app-script']) snapshot.querySelector(selector).remove();
+  snapshot.querySelector('#search').value = '';
+  snapshot.querySelector('#search').removeAttribute('value');
+  for (const row of snapshot.querySelectorAll('#profiles li')) row.hidden = false;
+  const url = URL.createObjectURL(new Blob(['<!doctype html>\n' + snapshot.outerHTML], {type: 'text/html;charset=utf-8'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'instagram_non_followers.html';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+});
+</script>
+</body>
+</html>
