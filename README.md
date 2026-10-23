@@ -1,5 +1,8 @@
 # InstagramTools
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Maintained: yes](https://img.shields.io/badge/Maintained-yes-green.svg)
+
 A collection of small, independent tools for managing and working with Instagram data.
 
 ## Tools
